@@ -3,3 +3,4 @@ discordify-env/
 
 __pycache__/
 *.egg-info/
+token.dcfy

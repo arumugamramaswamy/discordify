@@ -12,7 +12,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/arumugam666/discordify",
-
+    scripts = ['scripts/create_config.py', 'scripts/run_discordify_app.py'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",

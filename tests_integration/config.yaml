@@ -1,0 +1,5 @@
+name: test_app
+command_prefix: "~"
+commands: 
+  locals:
+    function: test_app.get_locals
