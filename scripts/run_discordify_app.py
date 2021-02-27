@@ -4,7 +4,7 @@ from sys import argv, path
 from discordify import config_bot
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 # TODO figure out a way to remove this
 path.append(".")
 

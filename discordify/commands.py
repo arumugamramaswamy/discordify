@@ -5,7 +5,7 @@ import typing as T
 from discord import channel
 import discord
 from discord.ext import commands
-from discordify.messages import create_msg, parse_reply
+from discordify.messages import create_msg, parse_reply, np_array_from_png_bytes, _is_image
 
 logger = logging.getLogger(__name__)
 
@@ -62,15 +62,37 @@ def on_message_closure(bot: commands.Bot):
             logger.warning("channel %s already has a function registered to it", channel_name)
             return False
         
+        if len(inspect.signature(fn).parameters) != 1:
+            return False
+
         channel_specific_commands[channel_name] = fn
         return True
     
     @bot.event
     async def on_message(msg: discord.Message):
-        if msg.channel.name in channel_specific_commands:
+        if msg.author == bot.user:
+            return
+            
+        channel_name = msg.channel.name
+        if channel_name in channel_specific_commands:
             logger.info("Found command matching channel...")
             logger.info("Do some processing to check if inputs are acceptable")
+
             # TODO: figure out preprocessing
-    
+            assert (msg.content == '' or msg.attachments == [])
+            try:
+                if msg.content != '':
+                    channel_specific_commands[channel_name](msg.content)
+                else:
+                    png_ = await msg.attachments[0].read()
+                    np_arr = np_array_from_png_bytes(png_)
+                    result = channel_specific_commands[channel_name](np_arr)
+                    reply = parse_reply(result)
+                    logger.debug(reply)
+                    logger.debug("Is image %s", _is_image(result))
+                    reply = create_msg(**reply)
+                    await msg.channel.send(**reply)
+            except:
+                logger.exception("Error occured while calling function")
     return register_channel_command
         

@@ -9,5 +9,5 @@ commands:
     function: print
 channel-commands:
   command1:
-    function: print
+    function: test_app.to_gray
     channel: bot-spam
