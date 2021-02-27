@@ -21,8 +21,11 @@ def _register_functions(app_config: T.Dict[str, T.Any]) -> commands.Bot:
     """
     app_name = app_config["name"]
     command_prefix = app_config["command_prefix"]
-
+    
     bot = commands.Bot(command_prefix=command_prefix)
+    @bot.event
+    async def on_ready():
+        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"to help at {command_prefix}help"))
 
     for command_name, command_props in app_config["commands"].items():
 
