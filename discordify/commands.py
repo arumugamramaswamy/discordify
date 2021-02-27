@@ -83,6 +83,7 @@ def on_message_closure(bot: commands.Bot):
             try:
                 if msg.content != '':
                     channel_specific_commands[channel_name](msg.content)
+                    return
                 else:
                     png_ = await msg.attachments[0].read()
                     np_arr = np_array_from_png_bytes(png_)
@@ -92,7 +93,9 @@ def on_message_closure(bot: commands.Bot):
                     logger.debug("Is image %s", _is_image(result))
                     reply = create_msg(**reply)
                     await msg.channel.send(**reply)
+                    return
             except:
                 logger.exception("Error occured while calling function")
+        await bot.process_commands(msg)
     return register_channel_command
         
