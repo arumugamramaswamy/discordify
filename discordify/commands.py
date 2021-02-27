@@ -1,8 +1,13 @@
 """A module to register bot commands"""
 import inspect
+import logging
 import typing as T
+from discord import channel
+import discord
 from discord.ext import commands
 from discordify.messages import create_msg, parse_reply
+
+logger = logging.getLogger(__name__)
 
 def _copy_signature(source_fct): 
     def copy(target_fct):
@@ -47,3 +52,25 @@ def register_sync_func(
         await ctx.send(**msg)
 
     return wrapper
+
+def on_message_closure(bot: commands.Bot):
+
+    channel_specific_commands = {}
+
+    def register_channel_command(fn: T.Callable, channel_name: str) -> bool:
+        if channel_name in channel_specific_commands:
+            logger.warning("channel %s already has a function registered to it", channel_name)
+            return False
+        
+        channel_specific_commands[channel_name] = fn
+        return True
+    
+    @bot.event
+    async def on_message(msg: discord.Message):
+        if msg.channel.name in channel_specific_commands:
+            logger.info("Found command matching channel...")
+            logger.info("Do some processing to check if inputs are acceptable")
+            # TODO: figure out preprocessing
+    
+    return register_channel_command
+        

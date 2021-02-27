@@ -7,3 +7,7 @@ commands:
     function: discordify.commands.register_sync_func
   print:
     function: print
+channel-commands:
+  command1:
+    function: print
+    channel: bot-spam

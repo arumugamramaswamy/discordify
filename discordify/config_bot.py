@@ -7,7 +7,7 @@ import discord
 import yaml
 import importlib
 from discord.ext import commands
-from discordify.commands import register_sync_func
+from discordify.commands import register_sync_func, on_message_closure
 
 # example app config
 # {
@@ -45,6 +45,8 @@ def _setup_bot(app_config: T.Dict[str, T.Any]) -> commands.Bot:
 
     bot = commands.Bot(command_prefix=command_prefix)
 
+    register_channel_command: T.Callable[[T.Callable, str],bool] = on_message_closure(bot)
+
     @bot.event
     async def on_ready():
         await bot.change_presence(
@@ -54,15 +56,27 @@ def _setup_bot(app_config: T.Dict[str, T.Any]) -> commands.Bot:
             )
         )
 
-    for command_name, command_props in app_config["commands"].items():
+    if "commands" in app_config:
+        for command_name, command_props in app_config["commands"].items():
 
-        try:
-            fn = _get_fn_from_name(command_props["function"])
-        except:
-            logger.exception("%s not found", command_props["function"])
-            continue            
-        
-        register_sync_func(bot, fn, command_name)
+            try:
+                fn = _get_fn_from_name(command_props["function"])
+            except:
+                logger.exception("%s not found", command_props["function"])
+                continue            
+            
+            register_sync_func(bot, fn, command_name)
+
+    if "channel-commands" in app_config:
+        for command_name, command_props in app_config["channel-commands"].items():
+
+            try:
+                fn = _get_fn_from_name(command_props["function"])
+            except:
+                logger.exception("%s not found", command_props["function"])
+                continue            
+            
+            register_channel_command(fn, command_props["channel"])
 
     return bot
 
