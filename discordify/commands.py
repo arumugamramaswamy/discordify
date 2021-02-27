@@ -1,7 +1,20 @@
 """A module to register bot commands"""
+import inspect
 import typing as T
 from discord.ext import commands
+from discordify.messages import create_msg, parse_reply
 
+def _copy_signature(source_fct): 
+    def copy(target_fct):
+        params = inspect.signature(target_fct).parameters
+        ctx_type = (list(params.values())[0])
+        try:
+            calling_type = list(inspect.signature(source_fct).parameters.values())
+            target_fct.__signature__ = inspect.Signature([ctx_type]+calling_type)
+        except:
+            pass
+        return target_fct 
+    return copy 
 
 def register_sync_func(
     bot: commands.Bot, fn: T.Callable, name: str = None, replace: bool = False
@@ -22,9 +35,15 @@ def register_sync_func(
     if name is None:
         name = fn.__name__
 
-    @bot.command(name)
+    help_str = inspect.getdoc(fn)
+
+    @bot.command(name=name, help=help_str)
+    @_copy_signature(fn)
     async def wrapper(ctx: commands.Context, *args, **kwargs):
-        await ctx.send(fn(*args, **kwargs))
-        # TODO: insert reply mechanisms
+        reply = fn(*args, **kwargs)
+
+        parsed_reply = parse_reply(reply)
+        msg = create_msg(**parsed_reply)
+        await ctx.send(**msg)
 
     return wrapper

@@ -1,5 +1,9 @@
 name: test_app
 command_prefix: "~"
 commands: 
-  locals:
-    function: test_app.get_locals
+  ls:
+    function: os.listdir
+  reg:
+    function: discordify.commands.register_sync_func
+  print:
+    function: print

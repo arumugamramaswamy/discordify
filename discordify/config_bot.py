@@ -1,3 +1,6 @@
+"""A module used to configure discord bots"""
+import logging
+import builtins
 import typing as T
 import json
 import discord
@@ -12,9 +15,26 @@ from discordify.commands import register_sync_func
 #     "command_prefix": "$",
 #     "commands": {"locals": {"function": "test_app.get_locals"}},
 # }
+logger = logging.getLogger(__name__)
 
 
-def _register_functions(app_config: T.Dict[str, T.Any]) -> commands.Bot:
+def _get_fn_from_name(fn_name: str)-> T.Callable:
+
+    python_path_list = fn_name.split(".")
+
+    if len(python_path_list) == 1:
+        fn_name = python_path_list[0]
+        module = builtins
+    else:
+        fn_name = python_path_list[-1]
+        module_path = ".".join(python_path_list[:-1])
+        module = importlib.import_module(module_path)
+
+    fn = getattr(module, fn_name)
+    return fn     
+
+
+def _setup_bot(app_config: T.Dict[str, T.Any]) -> commands.Bot:
     """Iterate through app config and create app
 
     Args:
@@ -36,13 +56,12 @@ def _register_functions(app_config: T.Dict[str, T.Any]) -> commands.Bot:
 
     for command_name, command_props in app_config["commands"].items():
 
-        python_path_list = command_props["function"].split(".")
-        fn_name = python_path_list[-1]
-        module_path = ".".join(python_path_list[:-1])
-
-        module = importlib.import_module(module_path)
-        fn = getattr(module, fn_name)
-
+        try:
+            fn = _get_fn_from_name(command_props["function"])
+        except:
+            logger.exception("%s not found", command_props["function"])
+            continue            
+        
         register_sync_func(bot, fn, command_name)
 
     return bot
@@ -53,7 +72,7 @@ def parse_yaml(filename) -> commands.Bot:
     with open(filename, "rb") as _file:
         app_config = yaml.load(_file, Loader=yaml.SafeLoader)
 
-    return _register_functions(app_config)
+    return _setup_bot(app_config)
 
 
 def parse_json(filename) -> commands.Bot:
@@ -61,4 +80,4 @@ def parse_json(filename) -> commands.Bot:
     with open(filename, "rb") as _file:
         app_config = json.load(_file)
 
-    return _register_functions(app_config)
+    return _setup_bot(app_config)

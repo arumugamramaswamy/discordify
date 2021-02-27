@@ -10,6 +10,9 @@
         },
         "info": {
             "function": "test_app.info"
+        },
+        "ls":{
+            "function": "os.listdir"
         }
     }
 }
