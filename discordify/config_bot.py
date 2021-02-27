@@ -13,6 +13,7 @@ from discordify.commands import register_sync_func
 #     "commands": {"locals": {"function": "test_app.get_locals"}},
 # }
 
+
 def _register_functions(app_config: T.Dict[str, T.Any]) -> commands.Bot:
     """Iterate through app config and create app
 
@@ -21,11 +22,17 @@ def _register_functions(app_config: T.Dict[str, T.Any]) -> commands.Bot:
     """
     app_name = app_config["name"]
     command_prefix = app_config["command_prefix"]
-    
+
     bot = commands.Bot(command_prefix=command_prefix)
+
     @bot.event
     async def on_ready():
-        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"to help at {command_prefix}help"))
+        await bot.change_presence(
+            activity=discord.Activity(
+                type=discord.ActivityType.listening,
+                name=f"to help at {command_prefix}help",
+            )
+        )
 
     for command_name, command_props in app_config["commands"].items():
 
@@ -40,16 +47,18 @@ def _register_functions(app_config: T.Dict[str, T.Any]) -> commands.Bot:
 
     return bot
 
+
 def parse_yaml(filename) -> commands.Bot:
     """Parse yaml config file"""
-    with open(filename, 'rb') as _file:
+    with open(filename, "rb") as _file:
         app_config = yaml.load(_file, Loader=yaml.SafeLoader)
-    
+
     return _register_functions(app_config)
+
 
 def parse_json(filename) -> commands.Bot:
     """Parse json config file"""
-    with open(filename, 'rb') as _file:
+    with open(filename, "rb") as _file:
         app_config = json.load(_file)
-    
+
     return _register_functions(app_config)

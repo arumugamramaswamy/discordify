@@ -10,14 +10,16 @@ config = argv[1]
 _, ext = splitext(config)
 ext = ext[1:]
 token = argv[2]
-print(f"Running app... with config type {ext}, config file {config}, token file {token}")
+print(
+    f"Running app... with config type {ext}, config file {config}, token file {token}"
+)
 
 if ext == "json":
     bot = config_bot.parse_json(config)
 elif ext == "yaml":
     bot = config_bot.parse_yaml(config)
 
-with open(token, 'r') as _token_file:
+with open(token, "r") as _token_file:
     token = _token_file.readline()
 
 bot.run(token)
