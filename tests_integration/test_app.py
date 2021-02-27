@@ -1,4 +1,6 @@
 import cv2
+
+
 def get_locals():
     return repr(locals())
 
@@ -10,8 +12,10 @@ def add(x, y):
 def info():
     return "Some info"
 
+
 def single_print(arg):
     return arg
+
 
 def to_gray(img):
     if len(img.shape) == 2:

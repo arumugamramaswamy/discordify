@@ -5,21 +5,29 @@ import typing as T
 from discord import channel
 import discord
 from discord.ext import commands
-from discordify.messages import create_msg, parse_reply, np_array_from_png_bytes, _is_image
+from discordify.messages import (
+    create_msg,
+    parse_reply,
+    np_array_from_png_bytes,
+    _is_image,
+)
 
 logger = logging.getLogger(__name__)
 
-def _copy_signature(source_fct): 
+
+def _copy_signature(source_fct):
     def copy(target_fct):
         params = inspect.signature(target_fct).parameters
-        ctx_type = (list(params.values())[0])
+        ctx_type = list(params.values())[0]
         try:
             calling_type = list(inspect.signature(source_fct).parameters.values())
-            target_fct.__signature__ = inspect.Signature([ctx_type]+calling_type)
+            target_fct.__signature__ = inspect.Signature([ctx_type] + calling_type)
         except:
             pass
-        return target_fct 
-    return copy 
+        return target_fct
+
+    return copy
+
 
 def register_sync_func(
     bot: commands.Bot, fn: T.Callable, name: str = None, replace: bool = False
@@ -53,35 +61,43 @@ def register_sync_func(
 
     return wrapper
 
+
 def on_message_closure(bot: commands.Bot):
+    """Create a closure for channel specific message registration and create the
+    on message method for the bot.
+
+    Args:
+        bot: the bot object being used to make the discord bot.
+    """
 
     channel_specific_commands = {}
 
     def register_channel_command(fn: T.Callable, channel_name: str) -> bool:
         if channel_name in channel_specific_commands:
-            logger.warning("channel %s already has a function registered to it", channel_name)
+            logger.warning(
+                "channel %s already has a function registered to it", channel_name
+            )
             return False
-        
+
         if len(inspect.signature(fn).parameters) != 1:
             return False
 
         channel_specific_commands[channel_name] = fn
         return True
-    
+
     @bot.event
     async def on_message(msg: discord.Message):
         if msg.author == bot.user:
             return
-            
+
         channel_name = msg.channel.name
         if channel_name in channel_specific_commands:
             logger.info("Found command matching channel...")
             logger.info("Do some processing to check if inputs are acceptable")
 
-            # TODO: figure out preprocessing
-            assert (msg.content == '' or msg.attachments == [])
+            assert msg.content == "" or msg.attachments == []
             try:
-                if msg.content != '':
+                if msg.content != "":
                     channel_specific_commands[channel_name](msg.content)
                     return
                 else:
@@ -97,5 +113,5 @@ def on_message_closure(bot: commands.Bot):
             except:
                 logger.exception("Error occured while calling function")
         await bot.process_commands(msg)
+
     return register_channel_command
-        

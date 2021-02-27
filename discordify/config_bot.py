@@ -3,9 +3,9 @@ import logging
 import builtins
 import typing as T
 import json
-import discord
-import yaml
 import importlib
+import yaml
+import discord
 from discord.ext import commands
 from discordify.commands import register_sync_func, on_message_closure
 
@@ -18,7 +18,7 @@ from discordify.commands import register_sync_func, on_message_closure
 logger = logging.getLogger(__name__)
 
 
-def _get_fn_from_name(fn_name: str)-> T.Callable:
+def _get_fn_from_name(fn_name: str) -> T.Callable:
 
     python_path_list = fn_name.split(".")
 
@@ -31,7 +31,7 @@ def _get_fn_from_name(fn_name: str)-> T.Callable:
         module = importlib.import_module(module_path)
 
     fn = getattr(module, fn_name)
-    return fn     
+    return fn
 
 
 def _setup_bot(app_config: T.Dict[str, T.Any]) -> commands.Bot:
@@ -45,7 +45,9 @@ def _setup_bot(app_config: T.Dict[str, T.Any]) -> commands.Bot:
 
     bot = commands.Bot(command_prefix=command_prefix)
 
-    register_channel_command: T.Callable[[T.Callable, str],bool] = on_message_closure(bot)
+    register_channel_command: T.Callable[[T.Callable, str], bool] = on_message_closure(
+        bot
+    )
 
     @bot.event
     async def on_ready():
@@ -63,8 +65,8 @@ def _setup_bot(app_config: T.Dict[str, T.Any]) -> commands.Bot:
                 fn = _get_fn_from_name(command_props["function"])
             except:
                 logger.exception("%s not found", command_props["function"])
-                continue            
-            
+                continue
+
             register_sync_func(bot, fn, command_name)
 
     if "channel-commands" in app_config:
@@ -74,8 +76,8 @@ def _setup_bot(app_config: T.Dict[str, T.Any]) -> commands.Bot:
                 fn = _get_fn_from_name(command_props["function"])
             except:
                 logger.exception("%s not found", command_props["function"])
-                continue            
-            
+                continue
+
             register_channel_command(fn, command_props["channel"])
 
     return bot

@@ -2,12 +2,14 @@
 import cv2
 import logging
 import typing as T
-import PIL
 import numpy as np
 import io
 from PIL import Image
 from discord import File
+
 logger = logging.getLogger(__name__)
+
+
 def _is_image(canditate_img):
 
     if isinstance(canditate_img, np.ndarray):
@@ -16,18 +18,21 @@ def _is_image(canditate_img):
             if 4 > len(canditate_img.shape) > 1:
                 return True
         elif canditate_img.dtype == np.float32:
-            if canditate_img.max() <= 1 and canditate_img.min()>=0:
+            if canditate_img.max() <= 1 and canditate_img.min() >= 0:
                 return True
-    
+
     return False
 
-def create_msg(content: T.Any=None, images: T.List[np.array] = None, files: str = None) -> T.Dict[str, T.Any]:
+
+def create_msg(
+    content: T.Any = None, images: T.List[np.array] = None, files: str = None
+) -> T.Dict[str, T.Any]:
     """Create a message using the input content, images and files"""
     msg_files = []
     if images is not None:
         for image in images:
             # img = Image.fromarray(image)
-            # logger.debug("PIL from numpy array %s", img)    
+            # logger.debug("PIL from numpy array %s", img)
             # buf = io.BytesIO()
             # img.save(buf, format="PNG")
             # img_bytes = buf.getvalue()
@@ -46,12 +51,13 @@ def create_msg(content: T.Any=None, images: T.List[np.array] = None, files: str 
 
     return {"content": content, "files": msg_files}
 
+
 def parse_reply(reply: T.Union[T.Tuple, T.Any]):
 
     parsed_reply = []
     files = []
     images = []
- 
+
     if not isinstance(reply, tuple):
         reply = (reply,)
 
@@ -63,10 +69,11 @@ def parse_reply(reply: T.Union[T.Tuple, T.Any]):
 
         else:
             parsed_reply.append(repr(obj))
-        
+
     parsed_reply = ",".join(parsed_reply)
-            
+
     return dict(content=parsed_reply, files=files, images=images)
+
 
 def np_array_from_png_bytes(png_bytes: bytes):
 
