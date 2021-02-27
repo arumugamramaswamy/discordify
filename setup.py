@@ -19,4 +19,11 @@ setuptools.setup(
     ],
     packages=["discordify"],
     python_requires=">=3.6",
+    install_requires =[
+        "discord.py==1.6.0",
+        "numpy==1.20.1",
+        "opencv-python==4.5.1.48",
+        "Pillow==8.1.0",
+        "PyYAML==5.4.1"
+    ],
 )

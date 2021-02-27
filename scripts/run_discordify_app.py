@@ -1,3 +1,4 @@
+#!/env/bin/python3
 import logging
 from os.path import splitext
 from sys import argv, path

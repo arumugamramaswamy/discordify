@@ -1,0 +1,35 @@
+{
+    "name": "test_app",
+    "command_prefix": "!",
+    "commands": {
+       "ls":{
+            "function": "os.listdir"
+        }
+    },
+    "channel-commands":{
+        "cmd1":{
+            "function": "image_pipeline.to_gray",
+            "channel": "to-gray"
+        },
+        "cmd2":{
+            "function": "image_pipeline.histogram_eq",
+            "channel": "histogram-eq"
+        },
+        "cmd3":{
+            "function": "image_pipeline.canny",
+            "channel": "canny"
+        },
+        "cmd4":{
+            "function":"image_pipeline.contour_detection",
+            "channel":"contour-detection"
+        },
+        "cmd5":{
+            "function":"image_pipeline.otsu_thresholding",
+            "channel":"otsu-thresholding"
+        },
+        "cmd6":{
+            "function":"image_pipeline.gaussian_blur",
+            "channel":"gaussian-blur"
+        }
+    }
+}
